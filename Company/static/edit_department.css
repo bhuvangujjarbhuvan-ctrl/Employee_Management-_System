@@ -1,40 +1,20 @@
-*{
-    padding: 0;
-    margin: 0;
-}
-body{
-    background-color: rgb(4, 78, 102);
-}
-form{
-    background-color: beige;
-    max-width: 20em;
-    margin: 7em auto;
-    padding: 30px;
-    border-radius: 10px;
-}
-body h1{
-    text-align: center;
-    margin: 30px;
-    color: white;
-}
-.edit_button{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-}
-.sub{
-    height: 25px;
-    width: auto;
-    padding: 0 5px;
-    border-radius: 10px;
-    background-color: black;
-    color: white;
-}
-.reset{
-    height: 25px;
-    width: auto;
-    padding: 0 5px;
-    border-radius: 10px;
-    background-color: black;
-    color: white;
-}
+/* Edit department form CSS — same as add */
+.breadcrumb { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 0.85rem; }
+.breadcrumb-link { display: flex; align-items: center; gap: 0.35rem; color: var(--text-muted); text-decoration: none; transition: var(--transition); }
+.breadcrumb-link svg { width: 14px; height: 14px; }
+.breadcrumb-link:hover { color: var(--accent-light); }
+.breadcrumb-sep { color: var(--text-muted); }
+.breadcrumb-current { color: var(--text-secondary); font-weight: 500; }
+.form-container { max-width: 780px; }
+.form-card { padding: 2.5rem; }
+.form-section { margin-bottom: 0.5rem; }
+.form-section-title { display: flex; align-items: center; gap: 0.6rem; font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 1.25rem; }
+.form-section-title svg { width: 15px; height: 15px; color: var(--accent); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.required { color: var(--danger-light); font-size: 0.9em; }
+.form-footer { display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; padding-top: 1.5rem; border-top: 1px solid var(--glass-border); margin-top: 1.5rem; }
+.form-input.is-valid { border-color: var(--success) !important; box-shadow: 0 0 0 3px rgba(40,200,120,0.12) !important; }
+.form-input.is-invalid { border-color: var(--danger) !important; box-shadow: 0 0 0 3px rgba(220,60,80,0.12) !important; }
+.field-error { font-size: 0.75rem; color: var(--danger-light); margin-top: 0.3rem; display: flex; align-items: center; gap: 0.35rem; }
+.field-error::before { content: '⚠'; font-size: 0.7rem; }
+@media (max-width: 600px) { .form-card { padding: 1.5rem; } .form-row { grid-template-columns: 1fr; } .form-footer { flex-wrap: wrap; } .form-footer .btn { flex: 1; justify-content: center; } }

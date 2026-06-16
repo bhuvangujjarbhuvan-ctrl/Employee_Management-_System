@@ -1,30 +1,92 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{% static 'add_department.css' %}">
-</head>
-<body>
-    <h1>Add Department</h1>
-    <hr>
-    <form action="/department/add/" method="post">
-        {% csrf_token %}
-        <label> Department Name</label>
-        <input type="text" name="dept_name" placeholder="Enter Department Name"><br><br>
-        <label> Department No. of Projects</label>
-        <input type="number" name="dept_projects" placeholder="Enter Department No. of Projects"><br><br>
-        <label> Department Head</label>
-        <input type="text" name="dept_head" placeholder="Enter Department Head"><br><br>
-        <label>Department Region</label>
-        <input type="text" name="dept_region" placeholder="Enter Department Region"><br><br>
-        <div class="add_button">
-            <button class="submit_button" type="submit">Submit</button>
-            <button class="cancel_button" type="reset">Reset</button>
+
+{% block title %}CorpNexus — Add Department{% endblock %}
+{% block nav_dept %}active{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'add_department.css' %}" />{% endblock %}
+
+{% block content %}
+<div class="container form-container">
+
+  <div class="breadcrumb animate-fade-up">
+    <a href="/department/department_list/" class="breadcrumb-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      All Departments
+    </a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">Add Department</span>
+  </div>
+
+  <div class="page-header" style="text-align:left; margin-bottom:1.5rem;">
+    <div class="page-badge" style="margin-bottom:0.6rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      New Department
+    </div>
+    <h1 style="font-size:2rem;">Create Department</h1>
+    <p>Set up a new organizational unit for your company</p>
+  </div>
+
+  <div class="form-card glass-card animate-fade-up stagger-1">
+    <form action="/department/add/" method="post" id="deptForm" novalidate>
+      {% csrf_token %}
+
+      <div class="form-section">
+        <div class="form-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          Department Information
         </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="dept_name">Department Name <span class="required">*</span></label>
+            <div class="form-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+              <input type="text" id="dept_name" name="dept_name" class="form-input" placeholder="e.g. Engineering" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="dept_projects">No. of Projects <span class="required">*</span></label>
+            <div class="form-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <input type="number" id="dept_projects" name="dept_projects" class="form-input" placeholder="e.g. 5" min="0" required />
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="dept_head">Department Head <span class="required">*</span></label>
+            <div class="form-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+              <input type="text" id="dept_head" name="dept_head" class="form-input" placeholder="e.g. Alice Johnson" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="dept_region">Region <span class="required">*</span></label>
+            <div class="form-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <input type="text" id="dept_region" name="dept_region" class="form-input" placeholder="e.g. North America" required />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <a href="/department/department_list/" class="btn btn-outline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          Cancel
+        </a>
+        <button type="reset" class="btn btn-ghost">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 2v6h6"/><path d="M2.66 15.57a10 10 0 1 0 .57-8.38"/></svg>
+          Reset
+        </button>
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          Create Department
+        </button>
+      </div>
     </form>
-    <a href="/department/department_list/"><button class="back_button">Back to Department List</button></a>
-</body>
-</html>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'dept_form.js' %}"></script>{% endblock %}

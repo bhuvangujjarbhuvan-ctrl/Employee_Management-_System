@@ -1,21 +1,133 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <link rel="stylesheet" href="{% static '/home.css' %}" />
-  </head>
-  <body>
-    <div class="home">
-      <header>
-        <h1>WELCOME</h1>
-      </header>
-      <div class="emp_dept">
-        <a class="home_nav" href="employee/view/">EMPLOYEE</a>
-        <a class="home_nav" href="department/department_list/">DEPARTMENT</a>
+
+{% block title %}CorpNexus — Dashboard{% endblock %}
+{% block nav_home %}active{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'home.css' %}" />{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="page-header">
+      <div class="page-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Company Management System
+      </div>
+      <h1>Welcome to CorpNexus</h1>
+      <p>Your centralized hub for managing employees and departments</p>
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-row animate-fade-up stagger-1">
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value" id="empCount" data-count="{{ employee_count }}">{{ employee_count }}</div>
+          <div class="stat-label">Total Employees</div>
+        </div>
+        <div class="stat-trend up">Active</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value" id="deptCount" data-count="{{ department_count }}">{{ department_count }}</div>
+          <div class="stat-label">Departments</div>
+        </div>
+        <div class="stat-trend up">Active</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon stat-icon-green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">100%</div>
+          <div class="stat-label">System Uptime</div>
+        </div>
+        <div class="stat-trend up">Healthy</div>
       </div>
     </div>
-  </body>
-</html>
+
+    <!-- Main Navigation Cards -->
+    <div class="nav-cards animate-fade-up stagger-2">
+
+      <a href="/employee/view/" class="nav-card nav-card-emp" id="empCard">
+        <div class="nav-card-glow"></div>
+        <div class="nav-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div class="nav-card-content">
+          <h2>Employees</h2>
+          <p>View, add, edit and manage all employee records, details and information</p>
+          <div class="nav-card-actions">
+            <span class="action-chip">View All</span>
+            <span class="action-chip">Add New</span>
+            <span class="action-chip">Edit</span>
+          </div>
+        </div>
+        <div class="nav-card-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </a>
+
+      <a href="/department/department_list/" class="nav-card nav-card-dept" id="deptCard">
+        <div class="nav-card-glow"></div>
+        <div class="nav-card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <path d="M9 22V12h6v10"/>
+          </svg>
+        </div>
+        <div class="nav-card-content">
+          <h2>Departments</h2>
+          <p>Organize and manage company departments, projects and regional structures</p>
+          <div class="nav-card-actions">
+            <span class="action-chip">View All</span>
+            <span class="action-chip">Add New</span>
+            <span class="action-chip">Edit</span>
+          </div>
+        </div>
+        <div class="nav-card-arrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Quick Action Shortcuts -->
+    <div class="quick-actions animate-fade-up stagger-3">
+      <div class="section-label">Quick Actions</div>
+      <div class="quick-actions-grid">
+        <a href="/employee/add/" class="quick-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+          Add Employee
+        </a>
+        <a href="/department/add/" class="quick-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Department
+        </a>
+        <a href="/employee/view/" class="quick-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          View All Employees
+        </a>
+        <a href="/department/department_list/" class="quick-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          View All Departments
+        </a>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'home.js' %}"></script>{% endblock %}

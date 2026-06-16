@@ -1,24 +1,94 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="{% static 'edit_department.css' %}">
-</head>
-<body>
-    <h1>Edit Department</h1>
-    <form method="POST" action="{% url 'Edit Department' department.id %}">
-        {% csrf_token %}
-        <p>Department Name: <input type="text" name="department_name" placeholder="Enter the Department Name" value="{{ department.department_name }}"></p><br>
-        <p>Department Head: <input type="text" name="department_head" placeholder="Enter the Department Head" value="{{ department.department_head }}"></p><br>
-        <p>Department Projects: <input type="number" name="department_no_of_projects" placeholder="Enter the Department Projects" value="{{ department.department_no_of_projects }}"></p><br>
-        <p>Department Region: <input type="text" name="department_region" placeholder="Enter the Department Region" value="{{ department.department_region }}"></p><br>
-        <div class="edit_button">
-            <button class="sub" type="submit">Save Changes</button>
-            <button class="reset" type="reset">Reset</button>
+
+{% block title %}CorpNexus — Edit {{ department.department_name }}{% endblock %}
+{% block nav_dept %}active{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'edit_department.css' %}" />{% endblock %}
+
+{% block content %}
+<div class="container form-container">
+
+  <div class="breadcrumb animate-fade-up">
+    <a href="/department/department_list/" class="breadcrumb-link">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      All Departments
+    </a>
+    <span class="breadcrumb-sep">/</span>
+    <a href="{% url 'Department Detail' department.id %}" class="breadcrumb-link">{{ department.department_name }}</a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">Edit</span>
+  </div>
+
+  <div class="page-header" style="text-align:left; margin-bottom:1.5rem;">
+    <div class="page-badge" style="margin-bottom:0.6rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Editing
+    </div>
+    <h1 style="font-size:2rem;">Edit Department</h1>
+    <p>Update the details for <strong>{{ department.department_name }}</strong></p>
+  </div>
+
+  <div class="form-card glass-card animate-fade-up stagger-1">
+    <form method="POST" action="{% url 'Edit Department' department.id %}" id="deptForm" novalidate>
+      {% csrf_token %}
+
+      <div class="form-section">
+        <div class="form-section-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+          Department Information
         </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="department_name">Department Name <span class="required">*</span></label>
+            <div class="form-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+              <input type="text" id="department_name" name="department_name" class="form-input" value="{{ department.department_name }}" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="department_no_of_projects">No. of Projects <span class="required">*</span></label>
+            <div class="form-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <input type="number" id="department_no_of_projects" name="department_no_of_projects" class="form-input" value="{{ department.department_projects }}" min="0" required />
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="department_head">Department Head <span class="required">*</span></label>
+            <div class="form-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+              <input type="text" id="department_head" name="department_head" class="form-input" value="{{ department.department_head }}" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="department_region">Region <span class="required">*</span></label>
+            <div class="form-input-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              <input type="text" id="department_region" name="department_region" class="form-input" value="{{ department.department_region }}" required />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <a href="{% url 'Department Detail' department.id %}" class="btn btn-outline">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+          Cancel
+        </a>
+        <button type="reset" class="btn btn-ghost">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 2v6h6"/><path d="M2.66 15.57a10 10 0 1 0 .57-8.38"/></svg>
+          Reset
+        </button>
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          Save Changes
+        </button>
+      </div>
     </form>
-</body>
-</html>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'dept_form.js' %}"></script>{% endblock %}

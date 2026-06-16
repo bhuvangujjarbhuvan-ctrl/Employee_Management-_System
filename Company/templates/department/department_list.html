@@ -1,44 +1,115 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <link rel="stylesheet" href="{% static 'department_list.css' %}" />
-  </head>
-  <body>
-    <h1>WELCOME</h1>
-    <hr />
-    <h2>Department List</h2>
-    <a href="/department/add/"
-      ><button class="add_button">Add Department</button></a
-    >
+
+{% block title %}CorpNexus — Departments{% endblock %}
+{% block nav_dept %}active{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'department_list.css' %}" />{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="page-header">
+    <div class="page-badge">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      Organization
+    </div>
+    <h1>Departments</h1>
+    <p>Manage your company's organizational structure</p>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar animate-fade-up stagger-1">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="deptSearch" class="search-input" placeholder="Search departments..." />
+    </div>
+    <a href="/department/add/" class="btn btn-primary">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Department
+    </a>
+  </div>
+
+  <!-- Department Grid -->
+  <div class="dept-grid animate-fade-up stagger-2" id="deptGrid">
     {% for department in departments %}
-    <div class="dept_view">
-      <div class="dept_details">
-        <p>
-          Department Name:
-          <span class="dept_style">{{ department.department_name }}</span>
-        </p>
-        <p>
-          Department No. of Projects:
-          <span class="dept_style">{{ department.department_projects }}</span>
-        </p>
-        <div class="view_button">
-          <a href="/department/edit_department/"
-            ><button class="edit_button">Edit</button></a
-          >
-          <a href="/department/delete/{{ department.id }}"
-            ><button class="delete_button">Delete</button></a
-          >
-          <a href="{% url 'Department Detail' department.id %}"
-            ><button class="edit_button">View</button></a
-          >
-          
+    <div class="dept-card" data-name="{{ department.department_name|lower }}">
+      <div class="dept-card-accent"></div>
+      <div class="dept-card-header">
+        <div class="dept-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        </div>
+        <div class="dept-meta">
+          <h3 class="dept-name">{{ department.department_name }}</h3>
+          <div class="dept-region">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            {{ department.department_region }}
+          </div>
         </div>
       </div>
+
+      <div class="dept-stats">
+        <div class="dept-stat">
+          <div class="dept-stat-value">{{ department.department_projects }}</div>
+          <div class="dept-stat-label">Projects</div>
+        </div>
+        <div class="dept-stat-sep"></div>
+        <div class="dept-stat">
+          <div class="dept-stat-value">{{ department.department_head|truncatechars:12 }}</div>
+          <div class="dept-stat-label">Department Head</div>
+        </div>
+      </div>
+
+      <div class="dept-card-footer">
+        <a href="{% url 'Department Detail' department.id %}" class="btn btn-ghost btn-sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          View
+        </a>
+        <a href="/department/edit_department/{{ department.id }}/" class="btn btn-outline btn-sm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </a>
+        <a href="/department/delete/{{ department.id }}/" class="btn btn-danger btn-sm" onclick="return confirmDelete('{{ department.department_name }}', this.href)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+          Delete
+        </a>
+      </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+      </div>
+      <h3>No Departments Yet</h3>
+      <p>Create your first department to organize your company</p>
+      <a href="/department/add/" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Create Department
+      </a>
     </div>
     {% endfor %}
-  </body>
-</html>
+  </div>
+
+  <div class="no-results" id="noResults" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <p>No departments match your search</p>
+  </div>
+
+</div>
+
+<!-- Delete Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal glass-card animate-scale-in">
+    <div class="modal-icon danger">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+    </div>
+    <h3>Delete Department?</h3>
+    <p id="deleteModalMsg">This action cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <a href="#" id="deleteConfirmBtn" class="btn btn-danger">Delete</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}<script src="{% static 'department_list.js' %}"></script>{% endblock %}
