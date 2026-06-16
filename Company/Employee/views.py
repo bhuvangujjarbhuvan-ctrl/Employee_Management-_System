@@ -1,11 +1,19 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.db import transaction
+from django.contrib.auth.models import User
+from django.contrib.auth import login
 from .models import Employee
 from Departments.models import Department
+from .forms import EmployeeSignupForm
+
 
 #Create your views here.
 
 def home(request):
-    """ Renders the home page for Employee app"""
+    """ Renders the home page or landing page depending on authentication status """
+    if not request.user.is_authenticated:
+        return render(request, 'landing.html')
+        
     employee_count = Employee.objects.count()
     department_count = Department.objects.count()
     return render(request, 'home.html', {
@@ -71,3 +79,31 @@ def employee_list(request):
     """ View to list all employees"""
     employees = Employee.objects.all()
     return render(request, 'employee/view_id.html', context={'employees': employees})
+
+def signup(request):
+    if request.user.is_authenticated:
+        return redirect('home')
+        
+    if request.method == 'POST':
+        form = EmployeeSignupForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            
+            with transaction.atomic():
+                # Create user
+                user = User.objects.create_user(username=username, password=password)
+                
+                # Create associated employee profile
+                employee = form.save(commit=False)
+                employee.user = user
+                employee.employee_role = 'Employee'  # Default role for new signups
+                employee.save()
+                
+            # Log the user in directly after signup
+            login(request, user)
+            return redirect('home')
+    else:
+        form = EmployeeSignupForm()
+        
+    return render(request, 'registration/signup.html', {'form': form})

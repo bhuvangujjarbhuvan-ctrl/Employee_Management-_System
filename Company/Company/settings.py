@@ -39,6 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'Departments',
     'Employee',
+    'rest_framework',
+    'Leave',
+    'Projects',
+    'Payroll',
+    'Documents',
 ]
 
 MIDDLEWARE = [
@@ -125,3 +130,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATICFILES_DIRS= [
     BASE_DIR / 'static'
 ]
+
+import os
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+

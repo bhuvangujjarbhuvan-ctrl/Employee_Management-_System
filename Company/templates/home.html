@@ -104,6 +104,14 @@
 
     </div>
 
+    <!-- Analytics Section -->
+    <div class="analytics-section animate-fade-up stagger-3" style="margin-top: 2rem; background: rgba(255, 255, 255, 0.05); padding: 2rem; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.1);">
+      <div class="section-label" style="margin-bottom: 1rem; font-size: 1.2rem; color: #fff;">Department Overview</div>
+      <div style="height: 300px; width: 100%;">
+        <canvas id="deptChart"></canvas>
+      </div>
+    </div>
+
     <!-- Quick Action Shortcuts -->
     <div class="quick-actions animate-fade-up stagger-3">
       <div class="section-label">Quick Actions</div>
@@ -124,10 +132,60 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
           View All Departments
         </a>
+        {% if user.employee.employee_role == 'Admin' or user.employee.employee_role == 'Manager' %}
+        <a href="/payroll/manage/" class="quick-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Manage Payroll
+        </a>
+        {% endif %}
       </div>
     </div>
   </section>
 </div>
 {% endblock %}
 
-{% block extra_js %}<script src="{% static 'home.js' %}"></script>{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    // Fetch departments and employees data to render chart
+    fetch('/api/departments/')
+      .then(res => res.json())
+      .then(departments => {
+        if (!Array.isArray(departments)) {
+          console.warn("Analytics data not available:", departments.detail || "Unknown error");
+          // Optionally display a fallback message in the canvas container
+          const container = document.getElementById('deptChart').parentElement;
+          container.innerHTML = `<p style="color: #ccc; text-align: center; margin-top: 50px;">Please <a href="/accounts/login/" style="color: #36A2EB;">Log in</a> to view analytics.</p>`;
+          return;
+        }
+        const labels = departments.map(d => d.department_name || d.name || 'Unnamed');
+        const data = departments.map(d => d.department_no_of_projects || 0);
+
+        const ctx = document.getElementById('deptChart').getContext('2d');
+        new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Projects per Department',
+              data: data,
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { beginAtZero: true }
+            }
+          }
+        });
+      })
+      .catch(err => console.error("Error fetching analytics data:", err));
+  });
+</script>
+<script src="{% static 'home.js' %}"></script>
+{% endblock %}
