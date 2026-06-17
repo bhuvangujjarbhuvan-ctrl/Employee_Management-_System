@@ -186,3 +186,71 @@ def employee_profile(request, emp_id):
         'contract_choices': Employee.CONTRACT_CHOICES,
         'role_choices': Employee.ROLE_CHOICES,
     })
+
+
+@login_required
+def admin_user_management(request):
+    """Admin-only panel to manage all user accounts and employee roles."""
+    try:
+        viewer = request.user.employee
+    except Employee.DoesNotExist:
+        messages.error(request, "Access denied.")
+        return redirect('home')
+
+    if viewer.employee_role != 'Admin':
+        messages.error(request, "Only Admins can access the User Management panel.")
+        return redirect('home')
+
+    # Handle role update via POST
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        emp_id = request.POST.get('emp_id')
+        target_emp = get_object_or_404(Employee, id=emp_id)
+
+        if action == 'update_role':
+            new_role = request.POST.get('role')
+            if new_role in ['Admin', 'Manager', 'Employee']:
+                target_emp.employee_role = new_role
+                target_emp.save()
+                messages.success(request, f"Role updated to '{new_role}' for {target_emp.employee_name}.")
+            else:
+                messages.error(request, "Invalid role selected.")
+
+        elif action == 'toggle_active':
+            if target_emp.user:
+                target_emp.user.is_active = not target_emp.user.is_active
+                target_emp.user.save()
+                status = "activated" if target_emp.user.is_active else "deactivated"
+                messages.success(request, f"Account {status} for {target_emp.employee_name}.")
+            else:
+                messages.error(request, "This employee has no linked user account.")
+
+        elif action == 'reset_password':
+            new_password = request.POST.get('new_password')
+            if target_emp.user and new_password and len(new_password) >= 6:
+                target_emp.user.set_password(new_password)
+                target_emp.user.save()
+                messages.success(request, f"Password reset successfully for {target_emp.employee_name}.")
+            else:
+                messages.error(request, "Password must be at least 6 characters.")
+
+        return redirect('admin_user_management')
+
+    # Gather all employees with their linked user status
+    all_employees = Employee.objects.select_related('user').order_by('employee_role', 'employee_name')
+
+    stats = {
+        'total': all_employees.count(),
+        'admins': all_employees.filter(employee_role='Admin').count(),
+        'managers': all_employees.filter(employee_role='Manager').count(),
+        'employees': all_employees.filter(employee_role='Employee').count(),
+        'active': sum(1 for e in all_employees if e.user and e.user.is_active),
+        'inactive': sum(1 for e in all_employees if e.user and not e.user.is_active),
+        'no_account': sum(1 for e in all_employees if not e.user),
+    }
+
+    return render(request, 'employee/user_management.html', {
+        'all_employees': all_employees,
+        'role_choices': Employee.ROLE_CHOICES,
+        'stats': stats,
+    })

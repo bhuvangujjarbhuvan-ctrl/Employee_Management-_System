@@ -11,4 +11,5 @@ urlpatterns = [
     path('accounts/signup/', signup, name='signup'),
     path('employee/profile/', my_profile, name='my_profile'),
     path('employee/profile/<int:emp_id>/', employee_profile, name='employee_profile'),
+    path('user-management/', admin_user_management, name='admin_user_management'),
 ]

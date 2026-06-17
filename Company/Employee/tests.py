@@ -311,4 +311,62 @@ class EmployeeProfileTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Profile User")
 
+    def test_admin_user_management_access(self):
+        """Only users with Admin role can access User Management."""
+        # Unauthenticated
+        response = self.client.get(reverse('admin_user_management'))
+        self.assertEqual(response.status_code, 302)
+
+        # Regular Employee
+        self.client.login(username="profile_user", password="pass1234")
+        response = self.client.get(reverse('admin_user_management'))
+        self.assertEqual(response.status_code, 302) # Redirects to home with error
+
+        # Admin
+        self.client.login(username="profile_admin", password="pass1234")
+        response = self.client.get(reverse('admin_user_management'))
+        if response.status_code == 302:
+            print("REDIRECT LOCATION:", response['Location'])
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "User Management")
+
+    def test_admin_user_management_update_role(self):
+        """Admin can change employee roles."""
+        self.client.login(username="profile_admin", password="pass1234")
+        response = self.client.post(reverse('admin_user_management'), {
+            'action': 'update_role',
+            'emp_id': self.employee.id,
+            'role': 'Manager',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.employee.refresh_from_db()
+        self.assertEqual(self.employee.employee_role, 'Manager')
+
+    def test_admin_user_management_toggle_active(self):
+        """Admin can toggle user active status."""
+        self.client.login(username="profile_admin", password="pass1234")
+        self.assertTrue(self.user.is_active)
+        response = self.client.post(reverse('admin_user_management'), {
+            'action': 'toggle_active',
+            'emp_id': self.employee.id,
+        })
+        self.assertEqual(response.status_code, 302)
+        self.user.refresh_from_db()
+        self.assertFalse(self.user.is_active)
+
+    def test_admin_user_management_reset_password(self):
+        """Admin can reset a user's password."""
+        self.client.login(username="profile_admin", password="pass1234")
+        response = self.client.post(reverse('admin_user_management'), {
+            'action': 'reset_password',
+            'emp_id': self.employee.id,
+            'new_password': 'newpassword123',
+        })
+        self.assertEqual(response.status_code, 302)
+        # Verify login with new password works
+        self.client.logout()
+        login_success = self.client.login(username="profile_user", password="newpassword123")
+        self.assertTrue(login_success)
+
+
 
