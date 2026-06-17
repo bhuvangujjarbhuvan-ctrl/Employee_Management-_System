@@ -1,0 +1,213 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CorpNexus — Notifications{% endblock %}
+
+{% block extra_css %}
+<style>
+  .notif-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .notif-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .notif-item {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    transition: var(--transition);
+    cursor: pointer;
+    position: relative;
+  }
+  .notif-item:hover {
+    border-color: var(--primary);
+    background: rgba(255,255,255,0.06);
+    transform: translateX(3px);
+  }
+  .notif-item.unread {
+    border-left: 3px solid var(--primary);
+  }
+  .notif-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 1.2rem;
+  }
+  .notif-icon.leave   { background: rgba(168,85,247,0.15); color: #c084fc; }
+  .notif-icon.payroll { background: rgba(46,204,113,0.15);  color: #58d68d; }
+  .notif-icon.task    { background: rgba(54,162,235,0.15);  color: var(--primary-light); }
+  .notif-icon.system  { background: rgba(234,179,8,0.15);   color: #fbbf24; }
+  .notif-body { flex: 1; min-width: 0; }
+  .notif-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+  }
+  .notif-msg {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .notif-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .read-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-muted);
+  }
+  .empty-state svg { width: 64px; height: 64px; opacity: 0.3; margin-bottom: 1rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <div class="breadcrumb animate-fade-up">
+    <a href="/" class="breadcrumb-link">Dashboard</a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">Notifications</span>
+  </div>
+
+  <div class="notif-header animate-fade-up">
+    <div>
+      <div class="page-badge" style="margin-bottom: 0.5rem;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Notifications
+      </div>
+      <h1 style="font-size:2rem;">Your Notifications</h1>
+      {% if unread_count > 0 %}
+        <p style="color: var(--text-secondary);">You have <strong style="color: var(--primary-light);">{{ unread_count }} unread</strong> notification{{ unread_count|pluralize }}.</p>
+      {% else %}
+        <p style="color: var(--text-muted);">All caught up!</p>
+      {% endif %}
+    </div>
+    {% if unread_count > 0 %}
+    <form method="POST" action="{% url 'notification_mark_all_read' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline" id="markAllReadBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        Mark All as Read
+      </button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="notif-list animate-fade-up stagger-1">
+    {% if notifications %}
+      {% for notif in notifications %}
+      <div class="notif-item {% if not notif.is_read %}unread{% endif %}" id="notif-{{ notif.id }}" onclick="markRead({{ notif.id }}, this)">
+        <div class="notif-icon {{ notif.category }}">
+          {% if notif.category == 'leave' %}📅
+          {% elif notif.category == 'payroll' %}💰
+          {% elif notif.category == 'task' %}✅
+          {% else %}🔔{% endif %}
+        </div>
+        <div class="notif-body">
+          <div class="notif-title">{{ notif.title }}</div>
+          <div class="notif-msg">{{ notif.message }}</div>
+          <div class="notif-meta">
+            <span>{{ notif.created_at|date:"M j, Y · g:i A" }}</span>
+            {% if not notif.is_read %}<span style="color: var(--primary-light); font-weight: 600;">· Unread</span>{% endif %}
+          </div>
+        </div>
+        {% if not notif.is_read %}
+        <div class="unread-dot"></div>
+        {% else %}
+        <div class="read-dot"></div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="glass-card empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <p style="font-size:1.1rem; font-weight:600;">No notifications yet</p>
+        <p style="font-size:0.9rem; margin-top:0.5rem;">You're all caught up. Notifications for leave approvals, payslips, and tasks will appear here.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+  function markRead(notifId, el) {
+    if (!el.classList.contains('unread')) return;
+    fetch(`/notifications/mark-read/${notifId}/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+    }).then(r => r.json()).then(data => {
+      if (data.status === 'ok') {
+        el.classList.remove('unread');
+        el.style.borderLeftColor = 'transparent';
+        const dot = el.querySelector('.unread-dot');
+        if (dot) { dot.className = 'read-dot'; }
+        const unreadLabel = el.querySelector('.notif-meta span:last-child');
+        if (unreadLabel && unreadLabel.textContent.includes('Unread')) unreadLabel.remove();
+        // Update badge in navbar
+        updateNavBadge();
+      }
+    });
+  }
+
+  function updateNavBadge() {
+    fetch('/notifications/api/unread-count/')
+      .then(r => r.json())
+      .then(data => {
+        const badge = document.getElementById('notifBadge');
+        if (badge) {
+          if (data.count > 0) {
+            badge.textContent = data.count;
+            badge.style.display = 'flex';
+          } else {
+            badge.style.display = 'none';
+          }
+        }
+      });
+  }
+</script>
+
+{% if messages %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    {% for message in messages %}
+      window.showToast("{{ message|escapejs }}", "{{ message.tags|default:'info' }}");
+    {% endfor %}
+  });
+</script>
+{% endif %}
+{% endblock %}

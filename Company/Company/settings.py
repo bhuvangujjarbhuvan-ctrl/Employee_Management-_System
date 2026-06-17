@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'Projects',
     'Payroll',
     'Documents',
+    'Notifications',
 ]
 
 MIDDLEWARE = [

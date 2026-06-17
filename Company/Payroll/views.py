@@ -4,6 +4,7 @@ from .models import SalaryDetails, Payslip
 from Documents.models import Document
 from Employee.models import Employee
 from django.contrib import messages
+from Notifications.utils import send_notification
 
 @login_required
 def payroll_dashboard(request):
@@ -102,6 +103,12 @@ def manage_payroll(request):
                     file=payslip_file
                 )
                 messages.success(request, f"Payslip uploaded successfully for {target_emp.employee_name}!")
+                send_notification(
+                    recipient=target_emp,
+                    title=f"Payslip Available — {month} {year} 💰",
+                    message=f"Your payslip for {month} {year} has been uploaded. Visit the Payroll portal to download it.",
+                    category='payroll',
+                )
             else:
                 messages.error(request, "Please provide all details and file for the payslip.")
 

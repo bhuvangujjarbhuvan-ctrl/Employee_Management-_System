@@ -16,6 +16,7 @@ urlpatterns = [
     path('leave/', include('Leave.urls')),
     path('projects/', include('Projects.urls')),
     path('payroll/', include('Payroll.urls')),
+    path('notifications/', include('Notifications.urls')),
     path('', include("Employee.urls")),
     path('', include("Departments.urls")),
 ]

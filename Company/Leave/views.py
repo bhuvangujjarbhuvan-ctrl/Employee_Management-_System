@@ -4,6 +4,7 @@ from django.utils import timezone
 from .models import Attendance, LeaveRequest
 from Employee.models import Employee
 from django.contrib import messages
+from Notifications.utils import send_notification
 
 @login_required
 def leave_dashboard(request):
@@ -95,9 +96,21 @@ def approve_leave(request, leave_id):
     if action == 'approve':
         leave_request.status = 'Approved'
         messages.success(request, f"Leave request for {leave_request.employee.employee_name} has been approved.")
+        send_notification(
+            recipient=leave_request.employee,
+            title="Leave Approved ✅",
+            message=f"Your {leave_request.leave_type} leave request from {leave_request.start_date} to {leave_request.end_date} has been approved by {employee.employee_name}.",
+            category='leave',
+        )
     elif action == 'reject':
         leave_request.status = 'Rejected'
         messages.success(request, f"Leave request for {leave_request.employee.employee_name} has been rejected.")
+        send_notification(
+            recipient=leave_request.employee,
+            title="Leave Rejected ❌",
+            message=f"Your {leave_request.leave_type} leave request from {leave_request.start_date} to {leave_request.end_date} has been rejected by {employee.employee_name}.",
+            category='leave',
+        )
     leave_request.save()
     return redirect('leave_dashboard')
 
