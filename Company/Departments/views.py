@@ -69,3 +69,47 @@ def department_detail(request, dept_id):
     """Displays the details of a specific Department"""
     department = Department.objects.get(id=dept_id)
     return render(request, 'department/department_detail.html', {'department': department})
+
+
+# 📊 Department Analytics
+@login_required
+def department_analytics(request):
+    """Renders visual analytics and breakdown statistics for departments"""
+    from Employee.models import Employee
+    from Projects.models import Project, Task
+    from Leave.models import LeaveRequest
+
+    departments = Department.objects.all()
+    dept_data = []
+
+    for dept in departments:
+        headcount = Employee.objects.filter(employee_department__iexact=dept.department_name).count()
+        projects_count = Project.objects.filter(department=dept).count()
+        
+        # Tasks related to projects in this department
+        dept_projects = Project.objects.filter(department=dept)
+        tasks_todo = Task.objects.filter(project__in=dept_projects, status__iexact='To Do').count()
+        tasks_progress = Task.objects.filter(project__in=dept_projects, status__iexact='In Progress').count()
+        tasks_completed = Task.objects.filter(project__in=dept_projects, status__iexact='Completed').count()
+        tasks_count = tasks_todo + tasks_progress + tasks_completed
+
+        leaves_count = LeaveRequest.objects.filter(
+            employee__employee_department__iexact=dept.department_name,
+            status='Approved'
+        ).count()
+
+        dept_data.append({
+            'name': dept.department_name,
+            'headcount': headcount,
+            'projects': projects_count,
+            'tasks': tasks_count,
+            'tasks_todo': tasks_todo,
+            'tasks_progress': tasks_progress,
+            'tasks_completed': tasks_completed,
+            'leaves': leaves_count,
+            'region': dept.department_region,
+            'head': dept.department_head,
+        })
+
+    return render(request, 'department/analytics.html', {'dept_data': dept_data})
+

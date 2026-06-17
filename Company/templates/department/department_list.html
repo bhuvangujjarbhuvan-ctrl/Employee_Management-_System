@@ -23,10 +23,16 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input type="text" id="deptSearch" class="search-input" placeholder="Search departments..." />
     </div>
-    <a href="/department/add/" class="btn btn-primary">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Add Department
-    </a>
+    <div style="display: flex; gap: 0.5rem;">
+      <a href="{% url 'Department Analytics' %}" class="btn btn-outline" style="border-color: rgba(255, 255, 255, 0.15);">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;margin-right: 0.25rem;"><rect x="18" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="2" y="13" width="4" height="8" rx="1"/></svg>
+        View Analytics
+      </a>
+      <a href="/department/add/" class="btn btn-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Department
+      </a>
+    </div>
   </div>
 
   <!-- Department Grid -->

@@ -1,0 +1,560 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CorpNexus — Department Analytics{% endblock %}
+{% block nav_departments %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+  :root {
+    --card-glow-blue: rgba(59, 130, 246, 0.15);
+    --card-glow-purple: rgba(139, 92, 246, 0.15);
+    --card-glow-green: rgba(16, 185, 129, 0.15);
+    --card-glow-amber: rgba(245, 158, 11, 0.15);
+  }
+
+  .analytics-header {
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .analytics-title h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 30%, var(--primary-light, #a5b4fc) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.25rem;
+  }
+
+  .analytics-title p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1.2rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+
+  .btn-back:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+  }
+
+  /* Stats Summary Grid */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .summary-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+  }
+
+  .summary-card.blue::before { background: var(--primary); }
+  .summary-card.purple::before { background: #8b5cf6; }
+  .summary-card.green::before { background: #10b981; }
+  .summary-card.amber::before { background: #f59e0b; }
+
+  .summary-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px -10px rgba(0,0,0,0.4);
+    border-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .summary-card.blue:hover { box-shadow: 0 12px 30px -10px var(--card-glow-blue); }
+  .summary-card.purple:hover { box-shadow: 0 12px 30px -10px var(--card-glow-purple); }
+  .summary-card.green:hover { box-shadow: 0 12px 30px -10px var(--card-glow-green); }
+  .summary-card.amber:hover { box-shadow: 0 12px 30px -10px var(--card-glow-amber); }
+
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .card-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .blue .card-icon { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+  .purple .card-icon { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
+  .green .card-icon { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+  .amber .card-icon { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+
+  .card-icon svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .card-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .card-label {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  /* Charts Grid */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  @media (max-width: 992px) {
+    .charts-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .chart-card {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 1.5rem;
+    height: 380px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .chart-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .chart-container {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Details Table Section */
+  .details-card {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .details-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  .analytics-table th {
+    padding: 1rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-muted);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    letter-spacing: 0.05em;
+  }
+
+  .analytics-table td {
+    padding: 1rem;
+    font-size: 0.9rem;
+    color: var(--text-main, #d1d5db);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .analytics-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .analytics-table tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .badge-region {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    padding: 0.25rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .progress-bar-container {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    height: 8px;
+    width: 120px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary) 0%, #a78bfa 100%);
+    border-radius: 10px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px; padding: 2rem 1rem;">
+  
+  <!-- Header -->
+  <div class="analytics-header animate-fade-in">
+    <div class="analytics-title">
+      <h1>Department Analytics</h1>
+      <p>Performance metrics, resource allocation, and project summaries by department</p>
+    </div>
+    <a href="{% url 'Department List' %}" class="btn-back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      All Departments
+    </a>
+  </div>
+
+  {% if dept_data %}
+  <!-- Summary Cards -->
+  <div class="summary-grid">
+    <div class="summary-card blue">
+      <div class="card-top">
+        <span class="card-label">Total Departments</span>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        </div>
+      </div>
+      <div class="card-value">{{ dept_data|length }}</div>
+    </div>
+    
+    <div class="summary-card purple">
+      <div class="card-top">
+        <span class="card-label">Total Headcount</span>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+      </div>
+      <div class="card-value" id="totalHeadcount">0</div>
+    </div>
+
+    <div class="summary-card green">
+      <div class="card-top">
+        <span class="card-label">Active Projects</span>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+        </div>
+      </div>
+      <div class="card-value" id="totalProjects">0</div>
+    </div>
+
+    <div class="summary-card amber">
+      <div class="card-top">
+        <span class="card-label">Approved Leaves</span>
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+      </div>
+      <div class="card-value" id="totalLeaves">0</div>
+    </div>
+  </div>
+
+  <!-- Visual Charts Section -->
+  <div class="charts-grid">
+    <!-- Chart 1: Headcount & Projects -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:var(--primary)"><rect x="18" y="3" width="4" height="18" rx="1"/><rect x="10" y="8" width="4" height="13" rx="1"/><rect x="2" y="13" width="4" height="8" rx="1"/></svg>
+          Resource Allocation (Headcount vs Projects)
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="resourceChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Chart 2: Task Completion Rate -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;color:#10b981"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 14 14"/></svg>
+          Tasks Status Breakdown
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="tasksChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detailed Table -->
+  <div class="details-card">
+    <div class="details-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:#a78bfa"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Department Statistics Directory
+    </div>
+    
+    <div class="table-responsive">
+      <table class="analytics-table">
+        <thead>
+          <tr>
+            <th>Department</th>
+            <th>Head of Department</th>
+            <th>Region</th>
+            <th>Headcount</th>
+            <th>Active Projects</th>
+            <th>Task Completion</th>
+            <th>Approved Leaves</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for dept in dept_data %}
+          <tr class="dept-row" 
+              data-name="{{ dept.name }}"
+              data-headcount="{{ dept.headcount }}"
+              data-projects="{{ dept.projects }}"
+              data-leaves="{{ dept.leaves }}"
+              data-todo="{{ dept.tasks_todo }}"
+              data-progress="{{ dept.tasks_progress }}"
+              data-completed="{{ dept.tasks_completed }}">
+            <td style="font-weight: 600; color: #fff;">{{ dept.name }}</td>
+            <td>{{ dept.head }}</td>
+            <td><span class="badge-region">{{ dept.region }}</span></td>
+            <td style="font-weight: 700;">{{ dept.headcount }}</td>
+            <td>{{ dept.projects }}</td>
+            <td>
+              {% if dept.tasks > 0 %}
+                {% widthratio dept.tasks_completed dept.tasks 100 as completion_rate %}
+                <div class="progress-bar-container" title="{{ dept.tasks_completed }}/{{ dept.tasks }} tasks completed">
+                  <div class="progress-bar-fill" style="width: {{ completion_rate }}%"></div>
+                </div>
+                <span style="font-size: 0.8rem; font-weight: 600; color: #34d399;">{{ completion_rate }}%</span>
+              {% else %}
+                <span style="color: var(--text-muted); font-size: 0.85rem;">No tasks</span>
+              {% endif %}
+            </td>
+            <td>{{ dept.leaves }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="details-card" style="text-align: center; padding: 3rem;">
+    <p style="color: var(--text-muted);">No departments found. Please add a department first.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const rows = document.querySelectorAll(".dept-row");
+    
+    let totalHeadcount = 0;
+    let totalProjects = 0;
+    let totalLeaves = 0;
+
+    const names = [];
+    const headcounts = [];
+    const projects = [];
+    
+    let totalTodo = 0;
+    let totalProgress = 0;
+    let totalCompleted = 0;
+
+    rows.forEach(row => {
+      const name = row.getAttribute("data-name");
+      const hc = parseInt(row.getAttribute("data-headcount")) || 0;
+      const proj = parseInt(row.getAttribute("data-projects")) || 0;
+      const lv = parseInt(row.getAttribute("data-leaves")) || 0;
+      
+      const todo = parseInt(row.getAttribute("data-todo")) || 0;
+      const progress = parseInt(row.getAttribute("data-progress")) || 0;
+      const completed = parseInt(row.getAttribute("data-completed")) || 0;
+
+      totalHeadcount += hc;
+      totalProjects += proj;
+      totalLeaves += lv;
+      
+      totalTodo += todo;
+      totalProgress += progress;
+      totalCompleted += completed;
+
+      names.push(name);
+      headcounts.push(hc);
+      projects.push(proj);
+    });
+
+    // Set summary values in UI
+    const totalHeadcountEl = document.getElementById("totalHeadcount");
+    const totalProjectsEl = document.getElementById("totalProjects");
+    const totalLeavesEl = document.getElementById("totalLeaves");
+    
+    if (totalHeadcountEl) totalHeadcountEl.textContent = totalHeadcount;
+    if (totalProjectsEl) totalProjectsEl.textContent = totalProjects;
+    if (totalLeavesEl) totalLeavesEl.textContent = totalLeaves;
+
+    // Render Resource Allocation Chart (Headcount vs Projects)
+    const ctxResource = document.getElementById("resourceChart");
+    if (ctxResource) {
+      new Chart(ctxResource.getContext("2d"), {
+        type: 'bar',
+        data: {
+          labels: names,
+          datasets: [
+            {
+              label: 'Employees Count',
+              data: headcounts,
+              backgroundColor: 'rgba(59, 130, 246, 0.6)',
+              borderColor: 'rgba(59, 130, 246, 1)',
+              borderWidth: 1.5,
+              borderRadius: 4
+            },
+            {
+              label: 'Active Projects',
+              data: projects,
+              backgroundColor: 'rgba(167, 139, 250, 0.6)',
+              borderColor: 'rgba(167, 139, 250, 1)',
+              borderWidth: 1.5,
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#e5e7eb' }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#9ca3af' }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#9ca3af', stepSize: 1 }
+            }
+          }
+        }
+      });
+    }
+
+    // Render Tasks Status Doughnut Chart
+    const ctxTasks = document.getElementById("tasksChart");
+    if (ctxTasks) {
+      const hasTasksData = (totalTodo + totalProgress + totalCompleted) > 0;
+      const chartLabels = hasTasksData ? ['To Do', 'In Progress', 'Completed'] : ['No Tasks Assigned'];
+      const chartData = hasTasksData ? [totalTodo, totalProgress, totalCompleted] : [1];
+      const chartColors = hasTasksData 
+        ? ['rgba(245, 158, 11, 0.6)', 'rgba(59, 130, 246, 0.6)', 'rgba(16, 185, 129, 0.6)']
+        : ['rgba(255, 255, 255, 0.1)'];
+
+      new Chart(ctxTasks.getContext("2d"), {
+        type: 'doughnut',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            data: chartData,
+            backgroundColor: chartColors,
+            borderColor: 'rgba(255, 255, 255, 0.1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: { color: '#e5e7eb' }
+            }
+          },
+          cutout: '65%'
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}
