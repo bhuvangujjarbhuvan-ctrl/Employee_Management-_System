@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from .models import Department
 
 # 🏠 Home Page
@@ -8,6 +9,7 @@ def home(request):
 
 
 # 📋 List All Departments
+@login_required
 def department_list(request):
     """Returns all the Departments with their details"""
     departments = Department.objects.all()
@@ -15,6 +17,7 @@ def department_list(request):
 
 
 # ➕ Add a New Department
+@login_required
 def add_department(request):
     """Provides the form to add a new Department"""
     if request.method == 'POST':
@@ -29,13 +32,13 @@ def add_department(request):
             department_head=department_head,
             department_region=department_region
         )
-        # 👇 FIXED PATH
         return render(request, 'deptmessage.html', {'msg': 'Department added successfully!'})
 
     return render(request, 'department/add_department.html')
 
 
 # ✏️ Edit Department
+@login_required
 def edit_department(request, dept_id):
     """Provides the form to edit a Department"""
     department = get_object_or_404(Department, id=dept_id)
@@ -46,23 +49,23 @@ def edit_department(request, dept_id):
         department.department_head = request.POST.get('department_head')
         department.department_region = request.POST.get('department_region')
         department.save()
-        # 👇 FIXED PATH
-        return render(request, 'deptmessage.html', {'msg': 'Department updated successfully!','department': department})
+        return render(request, 'deptmessage.html', {'msg': 'Department updated successfully!', 'department': department})
 
     return render(request, 'department/edit_department.html', {'department': department})
 
 
 # ❌ Delete Department
+@login_required
 def delete_department(request, dept_id):
     """Deletes a specific Department"""
     department = Department.objects.get(id=dept_id)
     department.delete()
-    # 👇 FIXED PATH
     return render(request, 'deptmessage.html', {'msg': 'Department deleted successfully!'})
 
 
 # 🔍 Department Detail
+@login_required
 def department_detail(request, dept_id):
     """Displays the details of a specific Department"""
-    department = Department.objects.get( id=dept_id)
+    department = Department.objects.get(id=dept_id)
     return render(request, 'department/department_detail.html', {'department': department})

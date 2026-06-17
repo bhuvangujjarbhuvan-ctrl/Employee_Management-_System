@@ -238,3 +238,77 @@ class CorpNexusTestCase(TestCase):
         # Clean up files
         payslip.file.delete()
 
+
+class EmployeeProfileTestCase(TestCase):
+    """Tests for the Employee Profile Page feature."""
+
+    def setUp(self):
+        self.client = Client()
+        self.dept = Department.objects.create(
+            department_name="QA",
+            department_no_of_projects=2,
+            department_head="Lead",
+            department_region="South"
+        )
+        self.user = User.objects.create_user(username="profile_user", password="pass1234")
+        self.employee = Employee.objects.create(
+            user=self.user,
+            employee_role="Employee",
+            employee_name="Profile User",
+            employee_age="28",
+            employee_address="123 Test St",
+            employee_department="QA",
+            employee_reporting_manager="Lead",
+            employee_email="profile@test.com",
+            bio="Hello world",
+            phone="1234567890",
+            contract_type="Full-Time",
+        )
+        self.admin_user = User.objects.create_user(username="profile_admin", password="pass1234")
+        self.admin_emp = Employee.objects.create(
+            user=self.admin_user,
+            employee_role="Admin",
+            employee_name="Profile Admin",
+            employee_age="35",
+            employee_address="456 Admin Ave",
+            employee_department="IT",
+            employee_reporting_manager="CTO",
+            employee_email="padmin@test.com",
+        )
+
+    def test_my_profile_requires_login(self):
+        """Unauthenticated users are redirected to login."""
+        response = self.client.get(reverse('my_profile'))
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/accounts/login/', response['Location'])
+
+    def test_my_profile_loads_for_authenticated_user(self):
+        """Authenticated employee can load their own profile."""
+        self.client.login(username="profile_user", password="pass1234")
+        response = self.client.get(reverse('my_profile'))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Profile User")
+
+    def test_my_profile_update_bio(self):
+        """Employee can update their bio via POST."""
+        self.client.login(username="profile_user", password="pass1234")
+        response = self.client.post(reverse('my_profile'), {
+            'bio': 'Updated bio text',
+            'phone': '9876543210',
+            'contract_type': 'Part-Time',
+            'employee_address': '789 New St',
+        })
+        self.assertEqual(response.status_code, 302)
+        self.employee.refresh_from_db()
+        self.assertEqual(self.employee.bio, 'Updated bio text')
+        self.assertEqual(self.employee.phone, '9876543210')
+        self.assertEqual(self.employee.contract_type, 'Part-Time')
+
+    def test_employee_profile_view_by_id(self):
+        """Admin can view any employee profile by ID."""
+        self.client.login(username="profile_admin", password="pass1234")
+        response = self.client.get(reverse('employee_profile', args=[self.employee.id]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Profile User")
+
+

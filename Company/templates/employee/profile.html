@@ -1,0 +1,426 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CorpNexus — {{ profile_employee.employee_name }} Profile{% endblock %}
+{% block nav_emp %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+  .profile-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 2rem;
+    margin-top: 1.5rem;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .profile-layout { grid-template-columns: 1fr; }
+  }
+
+  /* --- Left Sidebar Card --- */
+  .profile-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .profile-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    opacity: 0.15;
+  }
+  .avatar-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 1rem;
+  }
+  .avatar-img {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--primary);
+    box-shadow: 0 0 0 4px rgba(54, 162, 235, 0.2);
+    background: var(--glass-border);
+  }
+  .avatar-placeholder {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: white;
+    border: 4px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(54, 162, 235, 0.3);
+  }
+  .photo-upload-label {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    background: var(--primary);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 2px solid var(--bg-base);
+  }
+  .photo-upload-label:hover { background: var(--primary-dark); transform: scale(1.1); }
+  .photo-upload-label svg { width: 14px; height: 14px; color: white; }
+  #photoInput { display: none; }
+
+  .profile-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+  .profile-role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.9rem;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+  }
+  .role-admin    { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+  .role-manager  { background: rgba(168,85,247,0.15); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
+  .role-employee { background: rgba(54,162,235,0.15); color: var(--primary-light); border: 1px solid rgba(54,162,235,0.3); }
+
+  .profile-dept {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+  }
+  .profile-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 1.5rem;
+  }
+  .stat-item { text-align: center; }
+  .stat-item .s-val {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: block;
+  }
+  .stat-item .s-lbl {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* --- Right Content Area --- */
+  .profile-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .profile-section {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: var(--glass-blur);
+    border-radius: 16px;
+    padding: 2rem;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .section-header svg { width: 18px; height: 18px; color: var(--primary-light); }
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+  }
+  @media (max-width: 600px) { .info-grid { grid-template-columns: 1fr; } }
+  .info-item { display: flex; flex-direction: column; gap: 0.35rem; }
+  .info-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .info-value {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+  .bio-text {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 0.95rem;
+  }
+  .bio-placeholder { color: var(--text-muted); font-style: italic; }
+
+  /* Edit form styles */
+  .edit-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 600px) { .edit-form-grid { grid-template-columns: 1fr; } }
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .contract-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.8rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(46, 204, 113, 0.1);
+    color: #58d68d;
+    border: 1px solid rgba(46, 204, 113, 0.25);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Breadcrumbs -->
+  <div class="breadcrumb animate-fade-up">
+    <a href="/" class="breadcrumb-link">Dashboard</a>
+    <span class="breadcrumb-sep">/</span>
+    <a href="/employee/view/" class="breadcrumb-link">Employees</a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">{{ profile_employee.employee_name }}</span>
+  </div>
+
+  <form method="POST" enctype="multipart/form-data" id="profileForm">
+    {% csrf_token %}
+    <div class="profile-layout animate-fade-up stagger-1">
+
+      <!-- ===== LEFT SIDEBAR ===== -->
+      <div class="profile-sidebar">
+        <div class="profile-card">
+          <!-- Photo -->
+          <div class="avatar-wrapper">
+            {% if profile_employee.photo %}
+              <img src="{{ profile_employee.photo.url }}" alt="Profile Photo" class="avatar-img" id="avatarPreview"/>
+            {% else %}
+              <div class="avatar-placeholder" id="avatarPlaceholder">
+                {{ profile_employee.employee_name|slice:":1"|upper }}
+              </div>
+              <img src="" alt="" class="avatar-img" id="avatarPreview" style="display:none;"/>
+            {% endif %}
+            {% if can_edit %}
+            <label for="photoInput" class="photo-upload-label" title="Change photo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </label>
+            <input type="file" id="photoInput" name="photo" accept="image/*"/>
+            {% endif %}
+          </div>
+
+          <div class="profile-name">{{ profile_employee.employee_name }}</div>
+          <div class="profile-role-badge role-{{ profile_employee.employee_role|lower }}">
+            {{ profile_employee.employee_role }}
+          </div>
+          <div class="profile-dept">{{ profile_employee.employee_department }}</div>
+
+          <div class="profile-stats">
+            <div class="stat-item">
+              <span class="s-val">{{ profile_employee.employee_age }}</span>
+              <span class="s-lbl">Age</span>
+            </div>
+            <div class="stat-item">
+              <span class="s-val contract-chip" style="font-size:0.7rem; padding:0.2rem 0.5rem;">{{ profile_employee.contract_type }}</span>
+              <span class="s-lbl">Contract</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Info Card -->
+        <div class="profile-section">
+          <div class="section-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 14a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.56 3h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Contact
+          </div>
+          <div style="display:flex; flex-direction:column; gap:1rem;">
+            <div class="info-item">
+              <span class="info-label">Email</span>
+              <span class="info-value">{{ profile_employee.employee_email }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Phone</span>
+              {% if can_edit %}
+                <input type="text" name="phone" class="form-input" value="{{ profile_employee.phone }}" placeholder="Add phone number..." style="margin-top:0.25rem;"/>
+              {% else %}
+                <span class="info-value">{{ profile_employee.phone|default:"—" }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== RIGHT CONTENT ===== -->
+      <div class="profile-content">
+
+        <!-- About Me -->
+        <div class="profile-section">
+          <div class="section-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            About Me
+          </div>
+          {% if can_edit %}
+            <textarea name="bio" class="form-input" rows="4" placeholder="Write a short bio about yourself..." style="resize: vertical;">{{ profile_employee.bio }}</textarea>
+          {% else %}
+            {% if profile_employee.bio %}
+              <p class="bio-text">{{ profile_employee.bio }}</p>
+            {% else %}
+              <p class="bio-placeholder">No bio provided yet.</p>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        <!-- Employment Details -->
+        <div class="profile-section">
+          <div class="section-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Employment Details
+          </div>
+
+          {% if can_edit %}
+            <div class="edit-form-grid">
+              {% if role_choices %}
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="employee_name" class="form-input" value="{{ profile_employee.employee_name }}"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Department</label>
+                <input type="text" name="employee_department" class="form-input" value="{{ profile_employee.employee_department }}"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Role</label>
+                <select name="employee_role" class="form-input">
+                  {% for val, label in role_choices %}
+                    <option value="{{ val }}" {% if profile_employee.employee_role == val %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              {% endif %}
+              <div class="form-group">
+                <label class="form-label">Contract Type</label>
+                <select name="contract_type" class="form-input">
+                  {% for val, label in contract_choices %}
+                    <option value="{{ val }}" {% if profile_employee.contract_type == val %}selected{% endif %}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label class="form-label">Address</label>
+                <input type="text" name="employee_address" class="form-input" value="{{ profile_employee.employee_address }}"/>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Save Changes
+              </button>
+              <a href="/employee/view/" class="btn btn-ghost">Cancel</a>
+            </div>
+          {% else %}
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Department</span>
+                <span class="info-value">{{ profile_employee.employee_department }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Reporting Manager</span>
+                <span class="info-value">{{ profile_employee.employee_reporting_manager }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Contract Type</span>
+                <span class="info-value"><span class="contract-chip">{{ profile_employee.contract_type }}</span></span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Date Joined</span>
+                <span class="info-value">{{ profile_employee.date_joined|date:"F j, Y"|default:"—" }}</span>
+              </div>
+              <div class="info-item" style="grid-column: 1 / -1;">
+                <span class="info-label">Address</span>
+                <span class="info-value">{{ profile_employee.employee_address }}</span>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+  </form>
+</div>
+
+{% if messages %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    {% for message in messages %}
+      window.showToast("{{ message|escapejs }}", "{{ message.tags|default:'info' }}");
+    {% endfor %}
+  });
+</script>
+{% endif %}
+
+<script>
+  // Live photo preview on file select
+  const photoInput = document.getElementById('photoInput');
+  if (photoInput) {
+    photoInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const preview = document.getElementById('avatarPreview');
+        const placeholder = document.getElementById('avatarPlaceholder');
+        if (preview) {
+          preview.src = ev.target.result;
+          preview.style.display = 'block';
+        }
+        if (placeholder) placeholder.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+</script>
+{% endblock %}

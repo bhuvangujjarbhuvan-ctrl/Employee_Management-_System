@@ -72,6 +72,12 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         {{ user.username }}{% if user.employee %} ({{ user.employee.employee_role }}){% endif %}
       </span>
+      {% if user.employee %}
+      <a href="{% url 'my_profile' %}" class="btn btn-ghost" style="padding: 0.35rem 0.8rem; font-size: 0.8rem; margin-left: 0.25rem;" title="My Profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+        My Profile
+      </a>
+      {% endif %}
       <form method="post" action="{% url 'logout' %}" style="display: inline-flex; align-items: center;">
         {% csrf_token %}
         <button type="submit" class="btn btn-ghost" style="padding: 0.35rem 0.8rem; font-size: 0.8rem; margin-left: 0.25rem;">Log Out</button>
