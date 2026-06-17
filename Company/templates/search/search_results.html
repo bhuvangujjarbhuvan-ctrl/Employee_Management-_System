@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}CorpNexus — Search Results{% endblock %}
+
+{% block extra_css %}
+<style>
+  .search-container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .search-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .search-form-wrap {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .search-input-large {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: #fff;
+    font-size: 1.1rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .search-input-large::placeholder {
+    color: var(--text-muted);
+  }
+
+  .btn-search-submit {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-search-submit:hover {
+    background: var(--primary-light, #818cf8);
+    transform: translateY(-1px);
+  }
+
+  /* Filter Tabs */
+  .filter-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding-bottom: 0.75rem;
+    overflow-x: auto;
+  }
+
+  .filter-tab {
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .filter-tab:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .filter-tab.active {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  /* Results Sections */
+  .section-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-left: 3px solid var(--primary);
+    padding-left: 0.75rem;
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+
+  /* Glassmorphic Result Card */
+  .result-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.25rem;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .result-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 24px -10px rgba(0,0,0,0.5);
+  }
+
+  .result-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.25rem;
+  }
+
+  .result-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .result-meta {
+    font-size: 0.85rem;
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+  }
+
+  .result-meta svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-muted);
+  }
+
+  .badge-tag {
+    align-self: flex-start;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.75rem;
+  }
+
+  .badge-emp { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+  .badge-dept { background: rgba(139, 92, 246, 0.15); color: #c084fc; }
+  .badge-proj { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+
+  /* Empty state */
+  .no-results-wrap {
+    text-align: center;
+    padding: 4rem 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+  }
+
+  .no-results-wrap svg {
+    width: 64px;
+    height: 64px;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .no-results-wrap h2 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .no-results-wrap p {
+    color: var(--text-muted);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-container">
+  
+  <div class="search-header">
+    <h1 style="color: #fff; font-weight: 800; font-size: 2.2rem;">Search CorpNexus</h1>
+    <form action="{% url 'global_search' %}" method="get" class="search-form-wrap">
+      <input type="hidden" name="type" value="{{ filter_type }}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; color: var(--text-muted); margin-left: 0.75rem; align-self: center;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" name="q" class="search-input-large" value="{{ query }}" placeholder="Search employees, departments, or projects..." required autofocus>
+      <button type="submit" class="btn-search-submit">Search</button>
+    </form>
+  </div>
+
+  {% if query %}
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <a href="?q={{ query }}&type=all" class="filter-tab {% if filter_type == 'all' %}active{% endif %}">All Results ({{ total_results }})</a>
+      <a href="?q={{ query }}&type=employees" class="filter-tab {% if filter_type == 'employees' %}active{% endif %}">Employees ({{ employees|length }})</a>
+      <a href="?q={{ query }}&type=departments" class="filter-tab {% if filter_type == 'departments' %}active{% endif %}">Departments ({{ departments|length }})</a>
+      <a href="?q={{ query }}&type=projects" class="filter-tab {% if filter_type == 'projects' %}active{% endif %}">Projects ({{ projects|length }})</a>
+    </div>
+
+    {% if total_results > 0 %}
+      
+      <!-- Employee Results -->
+      {% if employees %}
+      <h2 class="section-title">Employees</h2>
+      <div class="results-grid">
+        {% for emp in employees %}
+        <a href="{% url 'employee_profile' emp.id %}" class="result-card">
+          <div>
+            <span class="badge-tag badge-emp">Employee</span>
+            <div class="result-title">{{ emp.employee_name }}</div>
+            <div class="result-subtitle">{{ emp.employee_role }} — {{ emp.employee_department }}</div>
+          </div>
+          <div>
+            <div class="result-meta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              {{ emp.employee_email }}
+            </div>
+            <div class="result-meta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              Manager: {{ emp.employee_reporting_manager }}
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Department Results -->
+      {% if departments %}
+      <h2 class="section-title">Departments</h2>
+      <div class="results-grid">
+        {% for dept in departments %}
+        <a href="{% url 'Department Detail' dept.id %}" class="result-card">
+          <div>
+            <span class="badge-tag badge-dept">Department</span>
+            <div class="result-title">{{ dept.department_name }}</div>
+            <div class="result-subtitle">Region: {{ dept.department_region }}</div>
+          </div>
+          <div>
+            <div class="result-meta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Manager: {{ dept.department_head }}
+            </div>
+            <div class="result-meta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Projects: {{ dept.department_no_of_projects }}
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Project Results -->
+      {% if projects %}
+      <h2 class="section-title">Projects</h2>
+      <div class="results-grid">
+        {% for proj in projects %}
+        <a href="/projects/" class="result-card">
+          <div>
+            <span class="badge-tag badge-proj">Project</span>
+            <div class="result-title">{{ proj.name }}</div>
+            <div class="result-subtitle">Department: {{ proj.department.department_name }}</div>
+          </div>
+          <div>
+            <div class="result-meta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Deadline: {{ proj.deadline }}
+            </div>
+            <div class="result-meta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+              Status: {{ proj.status }}
+            </div>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+    {% else %}
+      <div class="no-results-wrap animate-scale-in">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <h2>No Results Found</h2>
+        <p>We couldn't find any match for "{{ query }}". Try searching for names, roles, departments, or project status.</p>
+      </div>
+    {% endif %}
+
+  {% else %}
+    <div class="no-results-wrap" style="border-style: solid;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <h2>Start Searching</h2>
+      <p>Enter a query above to search globally across the CorpNexus platform.</p>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

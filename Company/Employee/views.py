@@ -254,3 +254,51 @@ def admin_user_management(request):
         'role_choices': Employee.ROLE_CHOICES,
         'stats': stats,
     })
+
+
+@login_required
+def global_search(request):
+    """Unified search view across Employees, Departments, and Projects."""
+    from django.db.models import Q
+    from Departments.models import Department
+    from Projects.models import Project
+
+    query = request.GET.get('q', '').strip()
+    filter_type = request.GET.get('type', 'all')
+
+    employees = []
+    departments = []
+    projects = []
+
+    if query:
+        if filter_type in ['all', 'employees']:
+            employees = Employee.objects.filter(
+                Q(employee_name__icontains=query) |
+                Q(employee_email__icontains=query) |
+                Q(employee_department__icontains=query) |
+                Q(employee_role__icontains=query)
+            ).order_by('employee_name')
+
+        if filter_type in ['all', 'departments']:
+            departments = Department.objects.filter(
+                Q(department_name__icontains=query) |
+                Q(department_head__icontains=query) |
+                Q(department_region__icontains=query)
+            ).order_by('department_name')
+
+        if filter_type in ['all', 'projects']:
+            projects = Project.objects.filter(
+                Q(name__icontains=query) |
+                Q(status__icontains=query)
+            ).order_by('name')
+
+    total_results = len(employees) + len(departments) + len(projects)
+
+    return render(request, 'search/search_results.html', {
+        'query': query,
+        'filter_type': filter_type,
+        'employees': employees,
+        'departments': departments,
+        'projects': projects,
+        'total_results': total_results,
+    })

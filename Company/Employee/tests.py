@@ -368,5 +368,26 @@ class EmployeeProfileTestCase(TestCase):
         login_success = self.client.login(username="profile_user", password="newpassword123")
         self.assertTrue(login_success)
 
+    def test_global_search_requires_login(self):
+        """Verify redirect to login for unauthenticated users"""
+        response = self.client.get(reverse('global_search'))
+        self.assertEqual(response.status_code, 302)
+
+    def test_global_search_results(self):
+        """Verify global search returns matching entities"""
+        self.client.login(username="profile_admin", password="pass1234")
+        
+        # Search for 'profile' (matches employee 'Profile User' and user 'profile_admin')
+        response = self.client.get(reverse('global_search'), {'q': 'profile'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Profile User")
+        
+        # Search for 'QA' (matches department QA)
+        response = self.client.get(reverse('global_search'), {'q': 'QA'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Department")
+        self.assertContains(response, "QA")
+
+
 
 
