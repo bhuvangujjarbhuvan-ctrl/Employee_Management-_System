@@ -82,6 +82,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  // --- User Profile Dropdown ---
+  const userMenuTrigger = document.getElementById('userMenuTrigger');
+  const userMenuDropdown = document.getElementById('userMenuDropdown');
+  if (userMenuTrigger && userMenuDropdown) {
+    userMenuTrigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userMenuDropdown.classList.toggle('show');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!userMenuTrigger.contains(e.target) && !userMenuDropdown.contains(e.target)) {
+        userMenuDropdown.classList.remove('show');
+      }
+    });
+  }
+
   // Inject ripple keyframe
   const style = document.createElement('style');
   style.textContent = `@keyframes ripple { to { transform: scale(4); opacity: 0; } }`;

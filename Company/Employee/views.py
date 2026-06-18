@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
 from django.contrib.auth.models import User
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Employee
@@ -302,3 +302,10 @@ def global_search(request):
         'projects': projects,
         'total_results': total_results,
     })
+
+
+def custom_logout(request):
+    """Custom logout view that handles both GET and POST requests gracefully."""
+    logout(request)
+    messages.success(request, "You have been logged out successfully.")
+    return redirect('home')
