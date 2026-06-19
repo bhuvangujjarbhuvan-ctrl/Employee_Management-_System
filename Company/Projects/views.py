@@ -47,7 +47,7 @@ def projects_dashboard(request):
                 title=title,
                 status=status
             )
-            messages.success(request, f"Task '{task.title}' assigned to {assigned_emp.first_name} {assigned_emp.last_name} successfully!")
+            messages.success(request, f"Task '{task.title}' assigned to {assigned_emp.employee_name} successfully!")
             return redirect('projects_dashboard')
 
         else:
@@ -73,7 +73,7 @@ def projects_dashboard(request):
     is_privileged = employee.employee_role in ['Admin', 'Manager']
     if is_privileged:
         departments = Department.objects.all()
-        all_employees = Employee.objects.all().order_by('first_name')
+        all_employees = Employee.objects.all().order_by('employee_name')
 
     return render(request, 'projects/dashboard.html', {
         'employee': employee,

@@ -220,7 +220,7 @@
               <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Assign Employee</label>
               <select name="assigned_employee" required style="width: 100%; background: var(--bg-input); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; color: #fff; outline: none;">
                 {% for emp in all_employees %}
-                  <option value="{{ emp.id }}">{{ emp.first_name }} {{ emp.last_name }} ({{ emp.employee_role }})</option>
+                  <option value="{{ emp.id }}">{{ emp.employee_name }} ({{ emp.employee_role }})</option>
                 {% endfor %}
               </select>
             </div>
