@@ -103,8 +103,10 @@ DATABASES = {
 }
 
 db_url = os.environ.get('DATABASE_URL')
-if db_url and db_url.strip():
-    DATABASES['default'] = dj_database_url.parse(db_url, conn_max_age=600)
+if db_url:
+    db_url = db_url.strip(' \'"')
+    if db_url.startswith(('postgres://', 'postgresql://', 'sqlite://')):
+        DATABASES['default'] = dj_database_url.parse(db_url, conn_max_age=600)
 
 
 # Password validation
