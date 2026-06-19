@@ -730,7 +730,40 @@ body {
 }
 
 /* --- Responsive --- */
-@media (max-width: 1400px) {
+@media (max-width: 1500px) and (min-width: 1201px) {
+  .navbar {
+    padding: 0 1rem;
+  }
+  .brand-name {
+    font-size: 1.15rem;
+  }
+  .brand-icon {
+    width: 32px;
+    height: 32px;
+    padding: 6px;
+  }
+  .nav-link {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.8rem;
+    gap: 0.3rem;
+  }
+  .nav-link svg {
+    width: 14px;
+    height: 14px;
+  }
+  .user-profile-trigger {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  .navbar form input {
+    width: 80px !important;
+  }
+  .navbar form input:focus {
+    width: 120px !important;
+  }
+}
+
+@media (max-width: 1200px) {
   .nav-links {
     display: none;
     position: absolute;
