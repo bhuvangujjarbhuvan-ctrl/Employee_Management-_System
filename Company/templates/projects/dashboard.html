@@ -139,6 +139,110 @@
     <p>Track department projects and manage your assigned tasks checklist</p>
   </div>
 
+  {% if is_privileged %}
+  <!-- Admin / Manager Quick Actions: Create Project & Assign Task -->
+  <div class="glass-card animate-fade-up" style="padding: 2rem; margin-bottom: 2rem;">
+    <div class="card-header-icon" style="border-bottom: 1px solid var(--glass-border); padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      Manager Console — Project & Task Administration
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+      <!-- Form 1: Create Project -->
+      <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md);">
+        <h3 style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-primary);">Create New Project</h3>
+        <form method="POST" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="create_project" />
+          
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Project Name</label>
+            <input type="text" name="name" required style="width: 100%; background: var(--bg-input); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; color: #fff; outline: none;" placeholder="e.g. Q3 Sales Expansion" />
+          </div>
+          
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Department</label>
+            <select name="department" required style="width: 100%; background: var(--bg-input); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; color: #fff; outline: none;">
+              {% for dept in departments %}
+                <option value="{{ dept.id }}">{{ dept.department_name }}</option>
+              {% empty %}
+                <option disabled>No departments available. Create one first.</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Deadline</label>
+              <input type="date" name="deadline" required style="width: 100%; background: var(--bg-input); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; color: #fff; outline: none;" />
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Initial Status</label>
+              <select name="status" style="width: 100%; background: var(--bg-input); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; color: #fff; outline: none;">
+                <option value="In Progress">In Progress</option>
+                <option value="On Hold">On Hold</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn" style="margin-top: 0.5rem; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; font-weight: 600; padding: 0.55rem; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition);">
+            Create Project
+          </button>
+        </form>
+      </div>
+
+      <!-- Form 2: Create & Assign Task -->
+      <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--glass-border); padding: 1.5rem; border-radius: var(--radius-md);">
+        <h3 style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text-primary);">Assign Task to Employee</h3>
+        <form method="POST" style="display: flex; flex-direction: column; gap: 0.75rem;">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="create_task" />
+          
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Task Title</label>
+            <input type="text" name="title" required style="width: 100%; background: var(--bg-input); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; color: #fff; outline: none;" placeholder="e.g. Design homepage wireframe" />
+          </div>
+          
+          <div>
+            <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Select Project</label>
+            <select name="project" required style="width: 100%; background: var(--bg-input); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; color: #fff; outline: none;">
+              {% for proj in all_projects %}
+                <option value="{{ proj.id }}">{{ proj.name }} ({{ proj.department.department_name }})</option>
+              {% empty %}
+                <option disabled>No active projects available. Create one first.</option>
+              {% endfor %}
+            </select>
+          </div>
+          
+          <div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem;">
+            <div>
+              <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Assign Employee</label>
+              <select name="assigned_employee" required style="width: 100%; background: var(--bg-input); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; color: #fff; outline: none;">
+                {% for emp in all_employees %}
+                  <option value="{{ emp.id }}">{{ emp.first_name }} {{ emp.last_name }} ({{ emp.employee_role }})</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div>
+              <label style="display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem;">Initial Status</label>
+              <select name="status" style="width: 100%; background: var(--bg-input); border: 1px solid var(--glass-border); border-radius: var(--radius-sm); padding: 0.5rem 0.75rem; color: #fff; outline: none;">
+                <option value="To Do">To Do</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Completed</option>
+              </select>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn" style="margin-top: 0.5rem; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; font-weight: 600; padding: 0.55rem; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition);">
+            Assign Task
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <div class="dashboard-grid animate-fade-up stagger-1">
     
     <!-- Left Column: My Tasks -->
