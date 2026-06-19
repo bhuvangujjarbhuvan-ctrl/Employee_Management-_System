@@ -1,7 +1,10 @@
 #  Employee Management System
 
+🚀 **Live Deployment**: [https://web-production-a8a12.up.railway.app/](https://web-production-a8a12.up.railway.app/)
+
 A web-based Employee Management System built using **Django**.  
 This application allows users to **add, view, edit, and delete employees and departments** with a clean, simple interface.
+
 
 ---
 
