@@ -1,2 +1,1 @@
-release: python Company/manage.py migrate
-web: gunicorn --pythonpath Company Company.wsgi:application
+web: python Company/manage.py migrate && gunicorn --pythonpath Company Company.wsgi:application
