@@ -29,6 +29,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
+# CSRF Trusted Origins for Secure Production HTTPS
+CSRF_TRUSTED_ORIGINS = []
+csrf_trusted_origins_env = os.environ.get('CSRF_TRUSTED_ORIGINS')
+if csrf_trusted_origins_env:
+    CSRF_TRUSTED_ORIGINS = csrf_trusted_origins_env.split(',')
+else:
+    railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+    if railway_domain:
+        CSRF_TRUSTED_ORIGINS.append(f'https://{railway_domain}')
+        CSRF_TRUSTED_ORIGINS.append(f'http://{railway_domain}')
+
+
 
 # Application definition
 
