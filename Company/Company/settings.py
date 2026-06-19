@@ -179,6 +179,10 @@ REST_FRAMEWORK = {
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'noreply@corpnexus.com'
 
+# 🔒 Session Security Settings
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+
 
 
 
